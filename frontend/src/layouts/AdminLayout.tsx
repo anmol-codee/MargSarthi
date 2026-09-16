@@ -51,9 +51,9 @@ export default function AdminLayout() {
         }`}
       >
         <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8 bg-gray-950">
-          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-400 to-primary-200">
+          <Link to="/admin/dashboard" className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-400 to-primary-200">
             MargSarthi Admin
-          </span>
+          </Link>
           <button className="lg:hidden p-2 text-gray-400 hover:text-white" onClick={() => setSidebarOpen(false)}>
             <X className="w-5 h-5" />
           </button>
@@ -113,9 +113,9 @@ export default function AdminLayout() {
         {/* Top navbar */}
         <header className="bg-white border-b border-gray-200 lg:hidden">
           <div className="flex h-16 items-center justify-between px-4 sm:px-6">
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-700 to-primary-500">
+            <Link to="/admin/dashboard" className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-700 to-primary-500">
               Admin Panel
-            </span>
+            </Link>
             <button
               onClick={() => setSidebarOpen(true)}
               className="p-2 text-gray-500 hover:text-gray-900 rounded-md"

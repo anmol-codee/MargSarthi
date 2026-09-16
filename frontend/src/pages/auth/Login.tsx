@@ -40,9 +40,9 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 card p-8 md:p-10">
         <div className="text-center">
-          <div className="mx-auto w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center mb-4">
+          <Link to="/" className="mx-auto w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center mb-4 hover:opacity-90 transition-opacity" title="Go to Homepage">
             <GraduationCap className="text-white w-7 h-7" />
-          </div>
+          </Link>
           <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
           <p className="mt-2 text-sm text-gray-600">
             Don't have an account?{' '}
