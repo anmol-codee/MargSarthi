@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { GraduationCap, Mail, Lock, ArrowRight } from 'lucide-react';
+import { GraduationCap, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useAuth } from '../../context/AuthContext';
@@ -10,6 +10,7 @@ import api from '../../lib/axios';
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   
@@ -67,15 +68,25 @@ export default function Login() {
               })}
             />
 
-            <Input
-              label="Password"
-              type="password"
-              autoComplete="current-password"
-              leftIcon={<Lock className="w-5 h-5" />}
-              placeholder="••••••••"
-              error={errors.password?.message as string}
-              {...register('password', { required: 'Password is required' })}
-            />
+            <div className="relative">
+              <Input
+                label="Password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                leftIcon={<Lock className="w-5 h-5" />}
+                placeholder="••••••••"
+                error={errors.password?.message as string}
+                {...register('password', { required: 'Password is required' })}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-9 text-gray-400 hover:text-gray-600 transition-colors"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center justify-between">

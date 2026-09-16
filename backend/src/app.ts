@@ -21,10 +21,30 @@ const app = express();
 // Security HTTP headers
 app.use(helmet());
 
-// CORS config
+// CORS config — allow all origins in development, specific list in production
+const allowedOrigins = env.FRONTEND_URL
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: [env.FRONTEND_URL],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, Postman)
+      if (!origin) return callback(null, true);
+      if (env.NODE_ENV === 'development') {
+        // In dev, allow any localhost/192.168/10.0 origin so phones on LAN can connect
+        if (
+          origin.includes('localhost') ||
+          origin.includes('127.0.0.1') ||
+          /^https?:\/\/(192\.168|10\.\d+|172\.(1[6-9]|2\d|3[01]))\./.test(origin)
+        ) {
+          return callback(null, true);
+        }
+      }
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
     credentials: true,
   })
 );

@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { GraduationCap, Mail, Lock, User, Phone, ArrowRight } from 'lucide-react';
+import { GraduationCap, Mail, Lock, User, Phone, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import api from '../../lib/axios';
 
 export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
   
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
@@ -81,33 +83,53 @@ export default function Register() {
             })}
           />
 
-          <Input
-            label="Password"
-            type="password"
-            leftIcon={<Lock className="w-5 h-5" />}
-            placeholder="••••••••"
-            error={errors.password?.message as string}
-            {...register('password', { 
-              required: 'Password is required',
-              minLength: { value: 8, message: 'Minimum 8 characters' },
-              pattern: {
-                value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/,
-                message: 'Must contain uppercase, lowercase, and number'
-              }
-            })}
-          />
+          <div className="relative">
+            <Input
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              leftIcon={<Lock className="w-5 h-5" />}
+              placeholder="••••••••"
+              error={errors.password?.message as string}
+              {...register('password', { 
+                required: 'Password is required',
+                minLength: { value: 8, message: 'Minimum 8 characters' },
+                pattern: {
+                  value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/,
+                  message: 'Must contain uppercase, lowercase, and number'
+                }
+              })}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-9 text-gray-400 hover:text-gray-600 transition-colors"
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
 
-          <Input
-            label="Confirm Password"
-            type="password"
-            leftIcon={<Lock className="w-5 h-5" />}
-            placeholder="••••••••"
-            error={errors.confirmPassword?.message as string}
-            {...register('confirmPassword', { 
-              required: 'Please confirm password',
-              validate: value => value === password || 'Passwords do not match'
-            })}
-          />
+          <div className="relative">
+            <Input
+              label="Confirm Password"
+              type={showConfirm ? 'text' : 'password'}
+              leftIcon={<Lock className="w-5 h-5" />}
+              placeholder="••••••••"
+              error={errors.confirmPassword?.message as string}
+              {...register('confirmPassword', { 
+                required: 'Please confirm password',
+                validate: value => value === password || 'Passwords do not match'
+              })}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirm(!showConfirm)}
+              className="absolute right-3 top-9 text-gray-400 hover:text-gray-600 transition-colors"
+              tabIndex={-1}
+            >
+              {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
 
           <div className="pt-2">
             <Button
