@@ -5,8 +5,8 @@
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply text-gray-900 bg-gray-50 font-sans antialiased selection:bg-primary-500 selection:text-white;
+  html, body {
+    @apply text-gray-900 bg-gray-50 font-sans antialiased selection:bg-primary-500 selection:text-white overflow-x-hidden max-w-full;
   }
 }
 
