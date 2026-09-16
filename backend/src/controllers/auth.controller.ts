@@ -39,16 +39,14 @@ export async function login(req: Request, res: Response, next: NextFunction) {
     const body = loginSchema.parse(req.body);
     const result = await authService.loginUser(body);
 
-    // Set refresh token as httpOnly cookie
-    res.cookie('refreshToken', result.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      // 'none' required for cross-domain (Vercel frontend <-> Railway backend)
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
-
-    success(res, { accessToken: result.accessToken, user: result.user }, 'Login successful');
+    // Return refresh token in the response body (not cookie) for cross-domain compatibility.
+    // Mobile browsers (Safari ITP, Chrome cookie restrictions) block cross-site cookies,
+    // so storing in localStorage is the reliable approach for Vercel <-> Railway deploys.
+    success(res, {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      user: result.user,
+    }, 'Login successful');
   } catch (err) {
     next(err);
   }
@@ -56,25 +54,23 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 
 export async function refresh(req: Request, res: Response, next: NextFunction) {
   try {
-    const token = req.cookies?.refreshToken;
+    // Accept refresh token from body (primary) or cookie (legacy fallback)
+    const token = req.body?.refreshToken || req.cookies?.refreshToken;
     if (!token) {
       res.status(401).json({ success: false, message: 'No refresh token' });
       return;
     }
     const tokens = await authService.refreshAccessToken(token);
-    res.cookie('refreshToken', tokens.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-    success(res, { accessToken: tokens.accessToken }, 'Token refreshed');
+    success(res, {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    }, 'Token refreshed');
   } catch (err) {
     next(err);
   }
 }
 
-export async function logout(req: Request, res: Response) {
+export async function logout(_req: Request, res: Response) {
   res.clearCookie('refreshToken');
   success(res, null, 'Logged out successfully');
 }

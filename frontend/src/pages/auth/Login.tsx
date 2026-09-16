@@ -22,7 +22,7 @@ export default function Login() {
       const response = await api.post('/auth/login', data);
       if (response.data.success) {
         toast.success('Logged in successfully!');
-        login(response.data.data.user, response.data.data.accessToken);
+        login(response.data.data.user, response.data.data.accessToken, response.data.data.refreshToken);
         
         if (response.data.data.user.role === 'ADMIN') {
           navigate('/admin');

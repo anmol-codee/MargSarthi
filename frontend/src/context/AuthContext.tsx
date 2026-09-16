@@ -16,7 +16,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (userData: User, token: string) => void;
+  login: (userData: User, token: string, refreshToken?: string) => void;
   logout: () => Promise<void>;
   updateUser: (data: Partial<User>) => void;
 }
@@ -55,8 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkAuth();
   }, []);
 
-  const login = (userData: User, token: string) => {
+  const login = (userData: User, token: string, refreshToken?: string) => {
     localStorage.setItem('accessToken', token);
+    if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
     setUser(userData);
   };
 
@@ -67,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Logout failed on server', error);
     } finally {
       localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
       setUser(null);
     }
   };
