@@ -1,0 +1,438 @@
+// MargSarthi — PostgreSQL Schema via Prisma ORM
+// Designed for 100-150 concurrent users, future-proof architecture
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum Role {
+  STUDENT
+  ADMIN
+  // COUNSELOR  -- reserved for future use, add when needed
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_FOR_STUDENT
+  RESOLVED
+  CLOSED
+}
+
+enum TicketMessageSender {
+  STUDENT
+  ADMIN
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum NoticeStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum DocumentType {
+  CASTE_CERTIFICATE
+  MIGRATION_CERTIFICATE
+  CLC
+  MARKSHEET
+  ID_PROOF
+  ADDRESS_PROOF
+  PHOTO
+  OTHER
+}
+
+enum CasteCategory {
+  GENERAL
+  OBC
+  SC
+  ST
+  EWS
+  OTHER
+}
+
+// ============================================================
+// USER (Base auth entity)
+// ============================================================
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  phone        String    @unique
+  passwordHash String    @map("password_hash")
+  role         Role      @default(STUDENT)
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at") // soft delete
+
+  // Relations
+  studentProfile   StudentProfile?
+  ticketsRaised    Ticket[]              @relation("TicketStudent")
+  ticketsClosed    Ticket[]              @relation("TicketClosedBy")
+  ticketMessages   TicketMessage[]
+  statusHistories  TicketStatusHistory[]
+  appointments     Appointment[]
+  notifications    Notification[]
+  adminNotices     Notice[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+// ============================================================
+// STUDENT PROFILE
+// ============================================================
+
+model StudentProfile {
+  id         String    @id @default(uuid())
+  userId     String    @unique @map("user_id")
+  studentId  String    @unique @map("student_id") // MS-2026-00142
+
+  // Personal
+  fullName   String    @map("full_name")
+  dateOfBirth DateTime? @map("date_of_birth")
+  gender     String?
+
+  // Contact / Address
+  address    String?
+  city       String?
+  state      String?
+  pincode    String?
+
+  // Caste Information
+  casteCategory CasteCategory? @map("caste_category")
+  casteSubCategory String?     @map("caste_sub_category")
+
+  // Profile completion (0-100)
+  completionPercent Int @default(0) @map("completion_percent")
+
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  education Education?
+  documents Document[]
+
+  @@index([studentId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("student_profiles")
+}
+
+// ============================================================
+// EDUCATION
+// ============================================================
+
+model Education {
+  id                String   @id @default(uuid())
+  studentProfileId  String   @unique @map("student_profile_id")
+
+  // School / Secondary
+  schoolName        String?  @map("school_name")
+  schoolPassingYear Int?     @map("school_passing_year")
+
+  // College / Higher Ed
+  collegeName       String?  @map("college_name")
+  course            String?  // e.g. B.Tech, B.Com, BA
+  stream            String?  // e.g. Science, Commerce, Arts
+  semester          String?  // e.g. "3rd Semester"
+  session           String?  // e.g. "2024-2025"
+  graduationYear    Int?     @map("graduation_year")
+
+  // Migration / Transfer
+  hasMigration      Boolean  @default(false) @map("has_migration")
+  migrationFrom     String?  @map("migration_from")
+  hasCLC            Boolean  @default(false) @map("has_clc")
+  clcFrom           String?  @map("clc_from")
+
+  // Additional
+  otherDetails      String?  @map("other_details")
+
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  studentProfile    StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+
+  @@map("education")
+}
+
+// ============================================================
+// DOCUMENTS
+// ============================================================
+
+model Document {
+  id               String       @id @default(uuid())
+  studentProfileId String       @map("student_profile_id")
+
+  documentType     DocumentType @map("document_type")
+  originalFilename String       @map("original_filename")
+  storageKey       String       @map("storage_key") // path in object storage
+  mimeType         String       @map("mime_type")
+  fileSizeBytes    Int          @map("file_size_bytes")
+  isVerified       Boolean      @default(false) @map("is_verified")
+  verifiedBy       String?      @map("verified_by") // admin userId
+  verifiedAt       DateTime?    @map("verified_at")
+  notes            String?
+
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+  deletedAt        DateTime?    @map("deleted_at") // soft delete
+
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+
+  @@index([studentProfileId])
+  @@index([documentType])
+  @@map("documents")
+}
+
+// ============================================================
+// TICKET CATEGORIES (database-driven, not hardcoded)
+// ============================================================
+
+model TicketCategory {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tickets     Ticket[]
+  // pricing is on TicketPriority — category can override if needed in future
+
+  @@map("ticket_categories")
+}
+
+// ============================================================
+// TICKET PRIORITIES (with configurable amounts)
+// ============================================================
+
+model TicketPriority {
+  id          String   @id @default(uuid())
+  name        String   @unique // LOW, MEDIUM, HIGH, URGENT
+  label       String   // Human-readable: "Low", "Medium", etc.
+  sortOrder   Int      @default(0) @map("sort_order")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tickets     Ticket[]
+
+  @@map("ticket_priorities")
+}
+
+// ============================================================
+// TICKETS
+// ============================================================
+
+model Ticket {
+  id             String       @id @default(uuid())
+  ticketNumber   String       @unique @map("ticket_number") // MS-2026-00142
+  studentId      String       @map("student_id") // user.id
+  categoryId     String       @map("category_id")
+  priorityId     String       @map("priority_id")
+  
+  title          String
+  description    String
+  
+  status         TicketStatus @default(OPEN)
+  
+  // Attachments
+  attachmentKey  String?      @map("attachment_key")
+  attachmentName String?      @map("attachment_name")
+
+  // Close metadata
+  closedAt       DateTime?    @map("closed_at")
+  closedById     String?      @map("closed_by_id") // admin user.id
+  closingNote    String?      @map("closing_note")
+
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  deletedAt      DateTime?    @map("deleted_at")
+
+  // Relations
+  student        User         @relation("TicketStudent", fields: [studentId], references: [id])
+  closedBy       User?        @relation("TicketClosedBy", fields: [closedById], references: [id])
+  category       TicketCategory @relation(fields: [categoryId], references: [id])
+  priority       TicketPriority @relation(fields: [priorityId], references: [id])
+  messages       TicketMessage[]
+  statusHistory  TicketStatusHistory[]
+
+  @@index([studentId])
+  @@index([status])
+  @@index([priorityId])
+  @@index([categoryId])
+  @@index([createdAt])
+  @@index([studentId, status]) // compound for student active tickets query
+  @@map("tickets")
+}
+
+// ============================================================
+// TICKET MESSAGES (admin/student conversation)
+// ============================================================
+
+model TicketMessage {
+  id        String              @id @default(uuid())
+  ticketId  String              @map("ticket_id")
+  senderId  String              @map("sender_id")
+  sender    TicketMessageSender
+  message   String
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  ticket    Ticket  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [senderId], references: [id])
+
+  @@index([ticketId])
+  @@map("ticket_messages")
+}
+
+// ============================================================
+// TICKET STATUS HISTORY (audit trail)
+// ============================================================
+
+model TicketStatusHistory {
+  id         String       @id @default(uuid())
+  ticketId   String       @map("ticket_id")
+  changedById String      @map("changed_by_id")
+  fromStatus TicketStatus @map("from_status")
+  toStatus   TicketStatus @map("to_status")
+  note       String?
+  createdAt  DateTime     @default(now()) @map("created_at")
+
+  ticket     Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  changedBy  User   @relation(fields: [changedById], references: [id])
+
+  @@index([ticketId])
+  @@map("ticket_status_history")
+}
+
+// ============================================================
+// APPOINTMENT SLOTS (created by admin)
+// ============================================================
+
+model AppointmentSlot {
+  id          String   @id @default(uuid())
+  date        DateTime @db.Date
+  startTime   String   @map("start_time") // "10:00"
+  endTime     String   @map("end_time")   // "10:30"
+  capacity    Int      @default(1)
+  isActive    Boolean  @default(true) @map("is_active")
+  notes       String?
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  appointments Appointment[]
+
+  @@unique([date, startTime]) // no duplicate slots at same time
+  @@index([date])
+  @@index([isActive])
+  @@map("appointment_slots")
+}
+
+// ============================================================
+// APPOINTMENTS (student bookings)
+// ============================================================
+
+model Appointment {
+  id        String            @id @default(uuid())
+  slotId    String            @map("slot_id")
+  studentId String            @map("student_id")
+  status    AppointmentStatus @default(CONFIRMED)
+  notes     String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  slot    AppointmentSlot @relation(fields: [slotId], references: [id])
+  student User            @relation(fields: [studentId], references: [id])
+
+  @@unique([slotId, studentId]) // prevent double-booking same slot by same student
+  @@index([studentId])
+  @@index([slotId])
+  @@map("appointments")
+}
+
+// ============================================================
+// NOTICES / ANNOUNCEMENTS
+// ============================================================
+
+model Notice {
+  id          String       @id @default(uuid())
+  title       String
+  content     String
+  category    String?      // "General", "Scholarship", "Admission", etc.
+  status      NoticeStatus @default(DRAFT)
+  publishedAt DateTime?    @map("published_at")
+  expiresAt   DateTime?    @map("expires_at")
+  authorId    String       @map("author_id")
+  isPinned    Boolean      @default(false) @map("is_pinned")
+
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  deletedAt   DateTime?    @map("deleted_at")
+
+  author      User @relation(fields: [authorId], references: [id])
+
+  @@index([status])
+  @@index([publishedAt])
+  @@index([expiresAt])
+  @@map("notices")
+}
+
+// ============================================================
+// NOTIFICATIONS (for future real-time/push use)
+// ============================================================
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  title     String
+  message   String
+  isRead    Boolean  @default(false) @map("is_read")
+  type      String?  // "TICKET_UPDATED", "APPOINTMENT_CONFIRMED", etc.
+  metadata  Json?    // Extra context for the notification
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([userId])
+  @@map("notifications")
+}
+
+// ============================================================
+// SYSTEM SEQUENCES (for atomic ID generation)
+// ============================================================
+
+model Sequence {
+  id    String @id // e.g. "STUDENT_ID_2026" or "TICKET_ID_2026"
+  value Int    @default(0)
+
+  @@map("sequences")
+}
