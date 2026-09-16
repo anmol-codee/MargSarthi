@@ -43,7 +43,8 @@ export async function login(req: Request, res: Response, next: NextFunction) {
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      // 'none' required for cross-domain (Vercel frontend <-> Railway backend)
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -64,7 +65,7 @@ export async function refresh(req: Request, res: Response, next: NextFunction) {
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     success(res, { accessToken: tokens.accessToken }, 'Token refreshed');
