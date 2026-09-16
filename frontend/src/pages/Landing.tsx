@@ -16,21 +16,21 @@ export default function Landing() {
       {/* Navigation */}
       <nav className="fixed top-0 inset-x-0 z-50 glass-panel border-b border-gray-200/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
+          <div className="flex justify-between h-14 sm:h-16 items-center">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0">
                 <GraduationCap className="text-white w-5 h-5" />
               </div>
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-700 to-primary-500">
+              <span className="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-700 to-primary-500">
                 MargSarthi
               </span>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Link to="/login">
-                <Button variant="ghost" className="font-semibold">Log in</Button>
+                <Button variant="ghost" size="sm" className="font-semibold text-sm px-3 sm:px-4">Log in</Button>
               </Link>
               <Link to="/register">
-                <Button variant="primary" className="shadow-lg shadow-primary-500/30">Get Started</Button>
+                <Button variant="primary" size="sm" className="shadow-lg shadow-primary-500/30 text-sm px-3 sm:px-5 whitespace-nowrap">Get Started</Button>
               </Link>
             </div>
           </div>
@@ -45,13 +45,13 @@ export default function Landing() {
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800 mb-6">
                 Your Academic Journey, Simplified
               </span>
-              <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 tracking-tight mb-8">
-                Seamless Support for <br />
+              <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 tracking-tight mb-6 sm:mb-8 leading-tight">
+                Seamless Support for{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-primary-400">
                   Every Student
                 </span>
               </h1>
-              <p className="text-xl text-gray-600 mb-10 leading-relaxed">
+              <p className="text-base sm:text-xl text-gray-600 mb-8 sm:mb-10 leading-relaxed px-2 sm:px-0">
                 MargSarthi is the ultimate platform to resolve academic queries, book quick counseling calls, and manage your student profile with ease.
               </p>
               

@@ -1,6 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Users, Ticket, CheckCircle, Clock, CreditCard, TrendingUp } from 'lucide-react';
+import { Users, Ticket, CheckCircle, Clock } from 'lucide-react';
 import api from '../../lib/axios';
 
 export default function AdminDashboard() {
@@ -111,20 +112,24 @@ export default function AdminDashboard() {
               <div className="p-6 text-center text-gray-500 text-sm">No recent registrations</div>
             ) : (
               stats?.recent.students?.map((student: any) => (
-                <div key={student.studentId} className="p-4 flex items-center justify-between">
+                <Link
+                  key={student.studentId}
+                  to={`/admin/students/${student.userId}`}
+                  className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer"
+                >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-xs">
                       {student.fullName?.charAt(0) || 'S'}
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">{student.fullName}</p>
+                      <p className="font-semibold text-primary-700 hover:text-primary-900 text-sm underline-offset-2 hover:underline">{student.fullName}</p>
                       <p className="text-xs text-gray-500">{student.studentId}</p>
                     </div>
                   </div>
                   <span className="text-xs text-gray-400">
                     {new Date(student.createdAt).toLocaleDateString()}
                   </span>
-                </div>
+                </Link>
               ))
             )}
           </div>

@@ -52,6 +52,7 @@ export async function getDashboardStats() {
         studentId: true,
         fullName: true,
         createdAt: true,
+        userId: true,
       },
     }),
   ]);
