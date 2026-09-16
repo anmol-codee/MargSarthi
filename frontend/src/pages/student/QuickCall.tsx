@@ -13,11 +13,13 @@ export default function QuickCall() {
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
 
   const dateStr = selectedDate.toISOString().split('T')[0];
+  // Always fetch slots from today onwards so past dates in the view don't vanish
+  const todayStr = new Date().toISOString().split('T')[0];
 
   const { data: slots, isLoading } = useQuery({
-    queryKey: ['available-slots', dateStr],
+    queryKey: ['available-slots', todayStr],
     queryFn: async () => {
-      const { data } = await api.get(`/appointments/slots?from=${dateStr}`);
+      const { data } = await api.get(`/appointments/slots?from=${todayStr}`);
       return data.data;
     }
   });
