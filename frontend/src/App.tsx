@@ -3,9 +3,11 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
+import ScrollToTop from './components/ScrollToTop';
+import useImagePreloader from './hooks/useImagePreloader';
 // We will create these pages next
 import Landing from './pages/Landing';
+import Gallery from './pages/Gallery';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import StudentLayout from './layouts/StudentLayout';
@@ -58,13 +60,17 @@ function ProtectedRoute({ children, role }: { children: React.ReactNode; role?: 
 }
 
 export default function App() {
+  useImagePreloader();
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Landing />} />
+            <Route path="/gallery" element={<Gallery />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             

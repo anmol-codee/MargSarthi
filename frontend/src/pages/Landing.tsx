@@ -132,6 +132,17 @@ function GlobalStyles() {
         .lp-card-btn { align-self: stretch; text-align: center; padding: 0.4rem; font-size: 0.75rem; }
       }
 
+      /* Gallery */
+      .lp-gallery-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; }
+      @media (max-width: 767px) {
+        .lp-gallery-grid { grid-template-columns:repeat(2,1fr); gap:0.75rem; }
+      }
+      .lp-gallery-item { position:relative; aspect-ratio:1; border-radius:12px; overflow:hidden; background:#f3f4f6; cursor:pointer; }
+      .lp-gallery-item img { width:100%; height:100%; object-fit:cover; transition:transform 0.5s; }
+      .lp-gallery-item:hover img { transform:scale(1.1); }
+      .lp-gallery-overlay { position:absolute; inset:0; background:rgba(0,0,0,0); transition:background 0.3s; }
+      .lp-gallery-item:hover .lp-gallery-overlay { background:rgba(0,0,0,0.1); }
+
       /* Mobile nav drawer */
       .lp-mobile-menu { display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:#fff;flex-direction:column;padding:1.5rem; }
       .lp-mobile-menu.open { display:flex; }
@@ -208,6 +219,8 @@ const SERVICES = [
   { title: "Document Help", desc: "College document sorting guidance, ranking assistance, or help making the right choice." },
   { title: "Secure Profile", desc: "Upload and manage your educational documents securely." },
 ];
+
+const GALLERY_PREVIEW = Array.from({ length: 12 }, (_, i) => `/gallery/gallery-${(i + 1).toString().padStart(2, '0')}.jpeg`);
 
 const STEPS = [
   { n: "01", title: "Create Account", desc: "Sign up or continue with login." },
@@ -374,6 +387,34 @@ export default function Landing() {
           </div>
           <div style={{ textAlign: "center" }}>
             <Link to="/register" className="lp-cta">Get Started</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── GALLERY ── */}
+      <section className="lp-gallery-section" style={{ padding: "4rem 1.25rem", background: "#fff" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <h2 className="lp-section-title" style={{ textAlign: "center", marginBottom: "2rem" }}>Campus Gallery</h2>
+          <div className="lp-gallery-grid">
+            {GALLERY_PREVIEW.map((src, idx) => (
+              <Link to="/gallery" key={idx}>
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.05 }}
+                  className="lp-gallery-item"
+                >
+                  <img src={src} alt={`Gallery ${idx + 1}`} loading="lazy" />
+                  <div className="lp-gallery-overlay" />
+                </motion.div>
+              </Link>
+            ))}
+          </div>
+          <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
+            <Link to="/gallery" className="lp-cta" style={{ background: "transparent", color: "#2563eb", border: "2px solid #2563eb" }}>
+              View Full Gallery
+            </Link>
           </div>
         </div>
       </section>
