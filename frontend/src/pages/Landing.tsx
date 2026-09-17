@@ -71,7 +71,7 @@ function GlobalStyles() {
       .lp-card-icon { background:#eff6ff;border-radius:10px;width:100%;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center; }
       .lp-card h3 { font-weight:700;color:#111827;font-size:.95rem; }
       .lp-card p { font-size:.8rem;color:#6b7280;line-height:1.5; }
-      .lp-card-btn { display:inline-block;background:#2563eb;color:#fff;padding:.45rem 1.1rem;border-radius:6px;font-weight:600;font-size:.8rem;text-decoration:none;align-self:flex-start;transition:background .2s; }
+      .lp-card-btn { display:inline-block;background:#2563eb;color:#fff;padding:.45rem 1.1rem;border-radius:6px;font-weight:600;font-size:.8rem;text-decoration:none;align-self:flex-start;margin-top:auto;transition:background .2s; }
       .lp-card-btn:hover { background:#1d4ed8; }
       .lp-dots { display:flex;justify-content:center;gap:.35rem;margin-top:1.25rem; }
       .lp-dot { height:8px;border-radius:999px;border:none;cursor:pointer;padding:0;transition:all .3s; }
@@ -120,39 +120,16 @@ function GlobalStyles() {
         .lp-hamburger { display:flex;align-items:center;justify-content:center; }
       }
 
-      @media (max-width: 767px) {
-        .lp-cards-grid { 
-          display: flex !important; 
-          overflow-x: auto; 
-          scroll-snap-type: x mandatory; 
-          -webkit-overflow-scrolling: touch; 
-          gap: 1rem; 
-          padding-bottom: 1rem; 
-          scrollbar-width: none; 
-        }
-        .lp-cards-grid::-webkit-scrollbar { display: none; }
-        .lp-card { 
-          min-width: 48vw; 
-          scroll-snap-align: center; 
-          flex-shrink: 0; 
-          padding: 1rem;
-          gap: 0.75rem;
-        }
-        .lp-card-icon {
-          aspect-ratio: 4/3;
-          height: auto;
-        }
-        .lp-card h3 { font-size: 0.85rem; }
-        .lp-card p { font-size: 0.75rem; }
-        .lp-carousel-arrow, .lp-dots { display: none !important; }
-      }
-
       @media (max-width: 560px) {
         .lp-hero-h1 { font-size:1.65rem; }
         .lp-hiw-grid { grid-template-columns:1fr 1fr; }
-        .lp-carousel-wrap { gap:0; }
+        .lp-carousel-wrap { gap:0.5rem; }
         .lp-hero-right { width:clamp(200px,75vw,300px); }
         .lp-section-title { font-size:1.5rem; }
+        .lp-card p { display: none; }
+        .lp-card { padding: 0.8rem; gap: 0.5rem; align-items: center; text-align: center; }
+        .lp-card h3 { font-size: 0.85rem; line-height: 1.2; }
+        .lp-card-btn { align-self: stretch; text-align: center; padding: 0.4rem; font-size: 0.75rem; }
       }
 
       /* Mobile nav drawer */
@@ -242,24 +219,20 @@ const STEPS = [
 /* ─── Main Landing ──────────────────────────────────────────────────────────── */
 export default function Landing() {
   const [page, setPage] = useState(0);
-  // Detect mobile to adjust perPage
-  const [cols, setCols] = useState(4);
-  const [isMobile, setIsMobile] = useState(false);
+  // Always show 4 items per page to create a 4-col grid on desktop and 2x2 grid on mobile
+  const itemsPerPage = 4;
   
   useEffect(() => {
-    const update = () => {
-      setIsMobile(window.innerWidth < 768);
-      setCols(window.innerWidth < 900 ? 2 : 4);
-    };
-    update();
+    // Just re-render if needed, but pagination is fixed at 4 items
+    const update = () => {};
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  const totalPages = Math.ceil(SERVICES.length / cols);
+  const totalPages = Math.ceil(SERVICES.length / itemsPerPage);
   // clamp page
   const safePage = Math.min(page, totalPages - 1);
-  const visible = isMobile ? SERVICES : SERVICES.slice(safePage * cols, safePage * cols + cols);
+  const visible = SERVICES.slice(safePage * itemsPerPage, safePage * itemsPerPage + itemsPerPage);
 
   return (
     <div className="landing-root">

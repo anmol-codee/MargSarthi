@@ -49,26 +49,26 @@ export default function AdminTicketDetail() {
   if (!ticket) return <div className="p-8 text-center text-red-500">Ticket not found</div>;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 flex flex-col h-[calc(100vh-8rem)]">
+    <div className="max-w-5xl mx-auto space-y-4 md:space-y-6 flex flex-col h-[calc(100dvh-12rem)] md:h-[calc(100vh-8rem)] min-h-[700px] md:min-h-[500px]">
       {/* Header */}
-      <div className="flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" className="px-2" onClick={() => navigate(-1)}>
+      <div className="flex flex-col md:flex-row md:items-center justify-between shrink-0 gap-4 md:gap-0">
+        <div className="flex items-start md:items-center gap-2 md:gap-4">
+          <Button variant="ghost" className="px-2 -ml-2 mt-0.5 md:mt-0 shrink-0" onClick={() => navigate(-1)}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900">{ticket.title}</h1>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 md:mb-1 leading-tight">{ticket.title}</h1>
+            <div className="flex items-center gap-2 flex-wrap mb-2 md:mb-0 md:inline-flex">
               <StatusBadge status={ticket.status} />
               <PriorityBadge priority={ticket.priority.label} />
             </div>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-xs md:text-sm text-gray-500 mt-0 md:mt-1">
               Ticket #{ticket.ticketNumber} • {ticket.category.name} • Created on {new Date(ticket.createdAt).toLocaleDateString()}
             </p>
           </div>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="w-full md:w-auto pl-9 md:pl-0">
           <Select
             value={ticket.status}
             onChange={(e) => statusMutation.mutate(e.target.value)}
@@ -83,11 +83,11 @@ export default function AdminTicketDetail() {
         </div>
       </div>
 
-      <div className="flex gap-6 flex-1 min-h-0 flex-col-reverse lg:flex-row">
+      <div className="flex gap-4 md:gap-6 flex-1 min-h-0 flex-col-reverse lg:flex-row">
         {/* Main Conversation Area */}
-        <div className="flex-1 flex flex-col card overflow-hidden">
+        <div className="flex-1 flex flex-col card overflow-hidden border border-gray-200 shadow-sm min-h-[400px]">
           {/* Messages Scroll Area */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50/50">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 bg-gray-50/50">
             {/* Original Description as first message */}
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold shrink-0">
@@ -194,8 +194,8 @@ export default function AdminTicketDetail() {
         </div>
 
         {/* Sidebar Info */}
-        <div className="w-full lg:w-80 shrink-0 space-y-6">
-          <div className="card p-5">
+        <div className="w-full lg:w-80 shrink-0 space-y-4 md:space-y-6">
+          <div className="card p-4 md:p-5 border border-gray-200 shadow-sm">
             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2 border-b border-gray-100 pb-2">
               <User className="w-5 h-5 text-gray-400" />
               Student Information
