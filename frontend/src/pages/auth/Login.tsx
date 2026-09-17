@@ -11,6 +11,7 @@ import api from '../../lib/axios';
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [debugError, setDebugError] = useState<string | null>(null);
   const { login } = useAuth();
   const navigate = useNavigate();
   
@@ -18,6 +19,7 @@ export default function Login() {
 
   const onSubmit = async (data: any) => {
     setIsLoading(true);
+    setDebugError(null);
     try {
       const response = await api.post('/auth/login', data);
       if (response.data.success) {
@@ -31,7 +33,11 @@ export default function Login() {
         }
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed. Please try again.');
+      const msg = error.response?.data?.message || error.message || 'Network error';
+      const status = error.response?.status || 'No response';
+      const detail = `Status: ${status} | ${msg} | API: ${import.meta.env.VITE_API_URL}`;
+      setDebugError(detail);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -52,6 +58,12 @@ export default function Login() {
             </Link>
           </p>
         </div>
+
+        {debugError && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-xs font-mono text-red-700 break-all">{debugError}</p>
+          </div>
+        )}
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
