@@ -114,8 +114,8 @@ export default function TicketDetail() {
                     isOwn ? 'bg-primary-100 text-primary-700' : 'bg-amber-100 text-amber-700'
                   }`}>
                     {isOwn 
-                      ? (user?.fullName?.charAt(0) || 'S') 
-                      : (msg.sender.studentProfile?.fullName?.charAt(0) || 'A')}
+                      ? (user?.studentProfile?.fullName?.charAt(0) || 'U')
+                      : (msg.sender === 'ADMIN' ? 'A' : 'S')}
                   </div>
                   <div className={`flex-1 space-y-2 ${isOwn ? 'flex flex-col items-end' : ''}`}>
                     <div className={`p-4 shadow-sm border max-w-[85%] ${
@@ -125,7 +125,7 @@ export default function TicketDetail() {
                     }`}>
                       <div className="flex justify-between items-center mb-1 gap-4 opacity-80">
                         <span className={`font-semibold text-xs ${isOwn ? 'text-primary-50' : 'text-gray-900'}`}>
-                          {isOwn ? 'You' : (msg.sender.role === 'ADMIN' ? 'Support Admin' : msg.sender.studentProfile?.fullName)}
+                          {isOwn ? 'You' : (msg.sender === 'ADMIN' ? 'Support Admin' : 'Support')}
                         </span>
                         <span className="text-xs">{new Date(msg.createdAt).toLocaleString()}</span>
                       </div>

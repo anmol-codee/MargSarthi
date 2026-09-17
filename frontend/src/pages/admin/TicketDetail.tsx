@@ -68,7 +68,7 @@ export default function AdminTicketDetail() {
           </div>
         </div>
         
-        <div className="w-full md:w-48 pl-10 md:pl-0 shrink-0">
+        <div className="w-full md:w-48 mt-2 md:mt-0 shrink-0">
           <Select
             value={ticket.status}
             onChange={(e) => statusMutation.mutate(e.target.value)}
@@ -130,7 +130,7 @@ export default function AdminTicketDetail() {
 
             {/* Conversation Messages */}
             {ticket.messages.map((msg: any) => {
-              const isAdminMsg = msg.sender?.role === 'ADMIN' || msg.senderId === user?.id;
+              const isAdminMsg = msg.sender === 'ADMIN' || msg.senderId === user?.id;
               
               return (
                 <div key={msg.id} className={`flex items-start gap-4 ${isAdminMsg ? 'flex-row-reverse' : ''}`}>
