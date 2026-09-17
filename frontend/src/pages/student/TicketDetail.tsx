@@ -114,7 +114,7 @@ export default function TicketDetail() {
                     isOwn ? 'bg-primary-100 text-primary-700' : 'bg-amber-100 text-amber-700'
                   }`}>
                     {isOwn 
-                      ? (user?.studentProfile?.fullName?.charAt(0) || 'U')
+                      ? (user?.fullName?.charAt(0) || 'U')
                       : (msg.sender === 'ADMIN' ? 'A' : 'S')}
                   </div>
                   <div className={`flex-1 space-y-2 ${isOwn ? 'flex flex-col items-end' : ''}`}>
