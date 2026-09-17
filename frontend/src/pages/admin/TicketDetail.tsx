@@ -49,26 +49,26 @@ export default function AdminTicketDetail() {
   if (!ticket) return <div className="p-8 text-center text-red-500">Ticket not found</div>;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-4 md:space-y-6 flex flex-col h-[calc(100dvh-12rem)] md:h-[calc(100vh-8rem)] min-h-[700px] md:min-h-[500px]">
+    <div className="max-w-5xl mx-auto space-y-4 md:space-y-6 flex flex-col md:h-[calc(100vh-8rem)]">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between shrink-0 gap-4 md:gap-0">
-        <div className="flex items-start md:items-center gap-2 md:gap-4">
-          <Button variant="ghost" className="px-2 -ml-2 mt-0.5 md:mt-0 shrink-0" onClick={() => navigate(-1)}>
+      <div className="flex flex-col md:flex-row md:items-start justify-between shrink-0 gap-4">
+        <div className="flex items-start gap-2 md:gap-4">
+          <Button variant="ghost" className="px-2 -ml-2 shrink-0 mt-0.5 md:mt-1" onClick={() => navigate(-1)}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 md:mb-1 leading-tight">{ticket.title}</h1>
-            <div className="flex items-center gap-2 flex-wrap mb-2 md:mb-0 md:inline-flex">
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 leading-tight">{ticket.title}</h1>
+            <div className="flex flex-wrap items-center gap-2 mb-2">
               <StatusBadge status={ticket.status} />
               <PriorityBadge priority={ticket.priority.label} />
             </div>
-            <p className="text-xs md:text-sm text-gray-500 mt-0 md:mt-1">
+            <p className="text-xs md:text-sm text-gray-500">
               Ticket #{ticket.ticketNumber} • {ticket.category.name} • Created on {new Date(ticket.createdAt).toLocaleDateString()}
             </p>
           </div>
         </div>
         
-        <div className="w-full md:w-auto pl-9 md:pl-0">
+        <div className="w-full md:w-48 pl-10 md:pl-0 shrink-0">
           <Select
             value={ticket.status}
             onChange={(e) => statusMutation.mutate(e.target.value)}
@@ -85,7 +85,7 @@ export default function AdminTicketDetail() {
 
       <div className="flex gap-4 md:gap-6 flex-1 min-h-0 flex-col-reverse lg:flex-row">
         {/* Main Conversation Area */}
-        <div className="flex-1 flex flex-col card overflow-hidden border border-gray-200 shadow-sm min-h-[400px]">
+        <div className="flex-1 flex flex-col card overflow-hidden border border-gray-200 shadow-sm h-[500px] md:h-auto md:min-h-0">
           {/* Messages Scroll Area */}
           <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 bg-gray-50/50">
             {/* Original Description as first message */}
@@ -130,30 +130,30 @@ export default function AdminTicketDetail() {
 
             {/* Conversation Messages */}
             {ticket.messages.map((msg: any) => {
-              const isOwn = msg.senderId === user?.id;
+              const isAdminMsg = msg.sender?.role === 'ADMIN' || msg.senderId === user?.id;
               
               return (
-                <div key={msg.id} className={`flex items-start gap-4 ${isOwn ? 'flex-row-reverse' : ''}`}>
+                <div key={msg.id} className={`flex items-start gap-4 ${isAdminMsg ? 'flex-row-reverse' : ''}`}>
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold shrink-0 ${
-                    isOwn ? 'bg-amber-100 text-amber-700' : 'bg-primary-100 text-primary-700'
+                    isAdminMsg ? 'bg-amber-100 text-amber-700' : 'bg-primary-100 text-primary-700'
                   }`}>
-                    {isOwn 
+                    {isAdminMsg 
                       ? 'A' 
-                      : (msg.sender.studentProfile?.fullName?.charAt(0) || 'S')}
+                      : (ticket.student.studentProfile?.fullName?.charAt(0) || 'S')}
                   </div>
-                  <div className={`flex-1 space-y-2 ${isOwn ? 'flex flex-col items-end' : ''}`}>
+                  <div className={`flex-1 space-y-2 ${isAdminMsg ? 'flex flex-col items-end' : ''}`}>
                     <div className={`p-4 shadow-sm border max-w-[85%] ${
-                      isOwn 
+                      isAdminMsg 
                         ? 'bg-amber-600 text-white rounded-2xl rounded-tr-none border-amber-600' 
                         : 'bg-white text-gray-700 rounded-2xl rounded-tl-none border-gray-100'
                     }`}>
                       <div className="flex justify-between items-center mb-1 gap-4 opacity-80">
-                        <span className={`font-semibold text-xs ${isOwn ? 'text-amber-50' : 'text-gray-900'}`}>
-                          {isOwn ? 'You (Admin)' : (msg.sender.studentProfile?.fullName || 'Student')}
+                        <span className={`font-semibold text-xs ${isAdminMsg ? 'text-amber-50' : 'text-gray-900'}`}>
+                          {isAdminMsg ? 'Support Admin' : (ticket.student.studentProfile?.fullName || 'Student')}
                         </span>
                         <span className="text-xs">{new Date(msg.createdAt).toLocaleString()}</span>
                       </div>
-                      <p className={`whitespace-pre-wrap text-sm leading-relaxed ${isOwn ? 'text-white' : 'text-gray-700'}`}>
+                      <p className={`whitespace-pre-wrap text-sm leading-relaxed ${isAdminMsg ? 'text-white' : 'text-gray-700'}`}>
                         {msg.message}
                       </p>
                     </div>
