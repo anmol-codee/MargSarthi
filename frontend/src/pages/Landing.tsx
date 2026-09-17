@@ -120,11 +120,36 @@ function GlobalStyles() {
         .lp-hamburger { display:flex;align-items:center;justify-content:center; }
       }
 
+      @media (max-width: 767px) {
+        .lp-cards-grid { 
+          display: flex !important; 
+          overflow-x: auto; 
+          scroll-snap-type: x mandatory; 
+          -webkit-overflow-scrolling: touch; 
+          gap: 1rem; 
+          padding-bottom: 1rem; 
+          scrollbar-width: none; 
+        }
+        .lp-cards-grid::-webkit-scrollbar { display: none; }
+        .lp-card { 
+          min-width: 48vw; 
+          scroll-snap-align: center; 
+          flex-shrink: 0; 
+          padding: 1rem;
+          gap: 0.75rem;
+        }
+        .lp-card-icon {
+          aspect-ratio: 4/3;
+          height: auto;
+        }
+        .lp-card h3 { font-size: 0.85rem; }
+        .lp-card p { font-size: 0.75rem; }
+        .lp-carousel-arrow, .lp-dots { display: none !important; }
+      }
+
       @media (max-width: 560px) {
         .lp-hero-h1 { font-size:1.65rem; }
-        .lp-cards-grid { grid-template-columns:1fr 1fr; }
         .lp-hiw-grid { grid-template-columns:1fr 1fr; }
-        .lp-carousel-arrow { display:none; }
         .lp-carousel-wrap { gap:0; }
         .lp-hero-right { width:clamp(200px,75vw,300px); }
         .lp-section-title { font-size:1.5rem; }
@@ -197,14 +222,14 @@ function Navbar() {
 
 /* ─── Services data ─────────────────────────────────────────────────────────── */
 const SERVICES = [
-  { title: "Scholarship Info", desc: "Discover and apply for scholarships to ease your educational expense." },
-  { title: "Internship Opportunities", desc: "Find internship opportunities and kickstart your career with top companies." },
-  { title: "Document Help", desc: "College document sorting guidance, ranking assistance, or help making the right choice." },
   { title: "Career Counseling", desc: "Get expert career counseling to discover and pursue the right path for your future." },
   { title: "Ticket Resolution", desc: "Raise requests for ID cards, migration certificates, or fee issues." },
   { title: "Quick Calls", desc: "Book 10-15 minute slots with counselors or admins for urgent queries." },
-  { title: "Secure Profile", desc: "Upload and manage your educational documents securely." },
   { title: "Admissions Guide", desc: "Step-by-step guidance for college admissions across top institutions in India." },
+  { title: "Scholarship Info", desc: "Discover and apply for scholarships to ease your educational expense." },
+  { title: "Internship Opportunities", desc: "Find internship opportunities and kickstart your career with top companies." },
+  { title: "Document Help", desc: "College document sorting guidance, ranking assistance, or help making the right choice." },
+  { title: "Secure Profile", desc: "Upload and manage your educational documents securely." },
 ];
 
 const STEPS = [
@@ -219,8 +244,13 @@ export default function Landing() {
   const [page, setPage] = useState(0);
   // Detect mobile to adjust perPage
   const [cols, setCols] = useState(4);
+  const [isMobile, setIsMobile] = useState(false);
+  
   useEffect(() => {
-    const update = () => setCols(window.innerWidth < 560 ? 2 : window.innerWidth < 900 ? 2 : 4);
+    const update = () => {
+      setIsMobile(window.innerWidth < 768);
+      setCols(window.innerWidth < 900 ? 2 : 4);
+    };
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
@@ -229,7 +259,7 @@ export default function Landing() {
   const totalPages = Math.ceil(SERVICES.length / cols);
   // clamp page
   const safePage = Math.min(page, totalPages - 1);
-  const visible = SERVICES.slice(safePage * cols, safePage * cols + cols);
+  const visible = isMobile ? SERVICES : SERVICES.slice(safePage * cols, safePage * cols + cols);
 
   return (
     <div className="landing-root">
